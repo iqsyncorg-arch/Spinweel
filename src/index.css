@@ -1,0 +1,70 @@
+:root {
+  --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-display: 'Outfit', system-ui, -apple-system, sans-serif;
+
+  /* Color Palette */
+  --bg-dark: #0A0D14;
+  --bg-card: #121722;
+  --bg-card-subtle: #19202E;
+  
+  --primary-red: #B90B1E;
+  --primary-red-dark: #8F0514;
+  --primary-red-light: #EF4444;
+
+  --gold-100: #FEF9C3;
+  --gold-200: #FEF08A;
+  --gold-300: #FDE047;
+  --gold-400: #FACC15;
+  --gold-500: #EAB308;
+  --gold-600: #CA8A04;
+  --gold-700: #A16207;
+  --gold-800: #854D0E;
+  --gold-900: #713F12;
+
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-gold: rgba(234, 179, 8, 0.35);
+
+  --shadow-lg: 0 10px 30px -5px rgba(0, 0, 0, 0.6);
+  --shadow-gold: 0 0 45px rgba(234, 179, 8, 0.25);
+  --shadow-glow: 0 0 70px rgba(185, 11, 30, 0.28);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--gold-400);
+  outline-offset: 2px;
+}
+
+input, select {
+  font-family: inherit;
+}
