@@ -7,7 +7,16 @@ import { sound } from '../utils/audio';
 const NUM_SEGMENTS = PRIZES.length;
 const SEGMENT_ANGLE = 360 / NUM_SEGMENTS; // ~51.4286 deg
 
-export const Wheel = ({ onSpinEnd, isSpinning, setIsSpinning, targetPrizeIndex = null, onSpinStart }) => {
+export const Wheel = ({
+  onSpinEnd,
+  isSpinning,
+  setIsSpinning,
+  targetPrizeIndex = null,
+  onSpinStart,
+  hasWon = false,
+  wonPrize = null,
+  onSeeReward = null,
+}) => {
   const wheelRef = useRef(null);
   const currentRotationRef = useRef(0);
   const animFrameRef = useRef(null);
@@ -31,6 +40,12 @@ export const Wheel = ({ onSpinEnd, isSpinning, setIsSpinning, targetPrizeIndex =
 
   const spin = useCallback(() => {
     if (isSpinning) return;
+
+    if (hasWon && onSeeReward) {
+      sound.playClick();
+      onSeeReward();
+      return;
+    }
 
     if (onSpinStart && !onSpinStart()) {
       return; // Pre-conditions not met (e.g. form not filled)
@@ -577,30 +592,41 @@ export const Wheel = ({ onSpinEnd, isSpinning, setIsSpinning, targetPrizeIndex =
           </svg>
         </div>
 
-        {/* Center Interactive Spin Button Overlay */}
+        {/* Center Interactive Spin / Reward Button Overlay */}
         <button
-          className={`center-spin-button ${isSpinning ? 'spinning' : ''}`}
-          onClick={spin}
+          className={`center-spin-button ${isSpinning ? 'spinning' : ''} ${hasWon ? 'won-reward-btn' : ''}`}
+          onClick={hasWon && onSeeReward ? onSeeReward : spin}
           disabled={isSpinning}
-          title="Click to Spin the Wheel"
+          title={hasWon ? 'Click to view your claimed reward' : 'Click to Spin the Wheel'}
         >
           <span className="spin-btn-shine" />
           <span className="spin-btn-text">
-            {isSpinning ? 'LUCKY...' : 'SPIN'}
+            {isSpinning ? 'LUCKY...' : hasWon ? 'REWARD' : 'SPIN'}
           </span>
         </button>
       </div>
 
-      {/* Main Action Spin CTA Button */}
+      {/* Main Action CTA Button */}
       <div className="wheel-action-bar">
-        <button
-          className={`big-spin-btn ${isSpinning ? 'disabled' : ''}`}
-          onClick={spin}
-          disabled={isSpinning}
-        >
-          <span className="btn-icon">🎯</span>
-          <span>{isSpinning ? 'Wheel is Spinning...' : 'SPIN THE WHEEL NOW'}</span>
-        </button>
+        {hasWon ? (
+          <button
+            className="big-spin-btn btn-view-reward"
+            onClick={onSeeReward}
+            title="Click to view your claimed voucher code"
+          >
+            <span className="btn-icon">🎁</span>
+            <span>SEE MY WON REWARD {wonPrize?.code ? `(${wonPrize.code})` : ''}</span>
+          </button>
+        ) : (
+          <button
+            className={`big-spin-btn ${isSpinning ? 'disabled' : ''}`}
+            onClick={spin}
+            disabled={isSpinning}
+          >
+            <span className="btn-icon">🎯</span>
+            <span>{isSpinning ? 'Wheel is Spinning...' : 'SPIN THE WHEEL NOW'}</span>
+          </button>
+        )}
       </div>
     </div>
   );

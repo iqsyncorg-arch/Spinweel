@@ -19,6 +19,7 @@ import {
   PrizeVisual5,
   PrizeVisual6,
   PrizeVisual7,
+  PrizeVisual8,
 } from './PrizeIllustrations';
 
 export const PrizesShowcase = ({ wonPrizeId = null }) => {
@@ -37,7 +38,7 @@ export const PrizesShowcase = ({ wonPrizeId = null }) => {
             </h2>
           </div>
           <p className="section-main-subtext">
-            Spin the wheel and win exciting rewards on your eyewear purchase!
+            Spin the wheel and win exciting rewards + Free VIP Membership Card worth ₹999 on your eyewear purchase!
           </p>
         </div>
       </div>
@@ -46,9 +47,8 @@ export const PrizesShowcase = ({ wonPrizeId = null }) => {
       <div className="prizes-row-grid row-four-cols">
         {/* Card 1: 70% Discount on Spectacle */}
         <div
-          className={`prize-card card-gold ${
-            wonPrizeId === 'msc-70-off' ? 'won-active-glow' : ''
-          }`}
+          className={`prize-card card-gold ${wonPrizeId === 'msc-70-off' ? 'won-active-glow' : ''
+            }`}
         >
           {/* Top Floating Golden Crown Badge */}
           <div className="floating-crown-badge" title="Grand Prize">
@@ -81,9 +81,8 @@ export const PrizesShowcase = ({ wonPrizeId = null }) => {
 
         {/* Card 2: Get Powered Sunglasses Free */}
         <div
-          className={`prize-card card-red ${
-            wonPrizeId === 'msc-sun-free' ? 'won-active-glow' : ''
-          }`}
+          className={`prize-card card-red ${wonPrizeId === 'msc-sun-free' ? 'won-active-glow' : ''
+            }`}
         >
           <div className="card-top-bar">
             <div className="badge-pill badge-pill-red-dark">
@@ -112,9 +111,8 @@ export const PrizesShowcase = ({ wonPrizeId = null }) => {
 
         {/* Card 3: 10% Hot Cash Back */}
         <div
-          className={`prize-card card-cyan ${
-            wonPrizeId === 'msc-hot-10' ? 'won-active-glow' : ''
-          }`}
+          className={`prize-card card-cyan ${wonPrizeId === 'msc-hot-10' ? 'won-active-glow' : ''
+            }`}
         >
           <div className="card-top-bar">
             <div className="badge-pill badge-pill-cyan-dark">
@@ -142,9 +140,8 @@ export const PrizesShowcase = ({ wonPrizeId = null }) => {
 
         {/* Card 4: 1st Lens or 1st Frame Free */}
         <div
-          className={`prize-card card-crimson ${
-            wonPrizeId === 'msc-1st-free' ? 'won-active-glow' : ''
-          }`}
+          className={`prize-card card-crimson ${wonPrizeId === 'msc-1st-free' ? 'won-active-glow' : ''
+            }`}
         >
           <div className="card-top-bar">
             <div className="badge-pill badge-pill-crimson-dark">
@@ -171,13 +168,12 @@ export const PrizesShowcase = ({ wonPrizeId = null }) => {
         </div>
       </div>
 
-      {/* Row 2: 3 Cards */}
-      <div className="prizes-row-grid row-three-cols">
+      {/* Row 2: 4 Cards (PRIZE #5 to #8) */}
+      <div className="prizes-row-grid row-four-cols">
         {/* Card 5: Spectacle Kit Free */}
         <div
-          className={`prize-card card-ice-blue ${
-            wonPrizeId === 'msc-kit-free' ? 'won-active-glow' : ''
-          }`}
+          className={`prize-card card-ice-blue ${wonPrizeId === 'msc-kit-free' ? 'won-active-glow' : ''
+            }`}
         >
           <div className="card-top-bar">
             <div className="badge-pill badge-pill-blue-dark">
@@ -205,9 +201,8 @@ export const PrizesShowcase = ({ wonPrizeId = null }) => {
 
         {/* Card 6: Sunglasses Free on Contact Lenses* */}
         <div
-          className={`prize-card card-gold ${
-            wonPrizeId === 'msc-sun-on-cl' ? 'won-active-glow' : ''
-          }`}
+          className={`prize-card card-gold ${wonPrizeId === 'msc-sun-on-cl' ? 'won-active-glow' : ''
+            }`}
         >
           <div className="card-top-bar">
             <div className="badge-pill badge-pill-gold-dark">
@@ -235,9 +230,8 @@ export const PrizesShowcase = ({ wonPrizeId = null }) => {
 
         {/* Card 7: Extra Mileage (2nd Option) */}
         <div
-          className={`prize-card card-steel-blue ${
-            wonPrizeId === 'msc-extra-mileage' ? 'won-active-glow' : ''
-          }`}
+          className={`prize-card card-steel-blue ${wonPrizeId === 'msc-extra-mileage' ? 'won-active-glow' : ''
+            }`}
         >
           <div className="card-top-bar">
             <div className="badge-pill badge-pill-steel-dark">
@@ -259,6 +253,35 @@ export const PrizesShowcase = ({ wonPrizeId = null }) => {
             </div>
             <div className="card-visual-col">
               <PrizeVisual7 />
+            </div>
+          </div>
+        </div>
+
+        {/* Card 8: VIP Membership Card Worth ₹999 */}
+        <div
+          className={`prize-card card-red ${wonPrizeId === 'msc-member-card' ? 'won-active-glow' : ''
+            }`}
+        >
+          <div className="card-top-bar">
+            <div className="badge-pill badge-pill-red-dark">
+              <CreditCard size={13} className="badge-icon" />
+              <span>PRIZE #8</span>
+            </div>
+            <div className="code-pill code-pill-gold-dashed">MSCVIP999</div>
+          </div>
+
+          <div className="card-content-body">
+            <div className="card-text-col">
+              <h3 className="card-headline">
+                <span className="headline-lead">Membership Card</span>
+                <span className="headline-sub">Worth ₹999</span>
+              </h3>
+              <p className="card-description">
+                1-Year MY SPECZ VIP Membership Card worth ₹999 completely FREE! Ultrasonic lens deep-cleaning, frame alignment & member privileges.
+              </p>
+            </div>
+            <div className="card-visual-col">
+              <PrizeVisual8 />
             </div>
           </div>
         </div>

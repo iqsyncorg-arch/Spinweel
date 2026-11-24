@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "backend": "cd spin_wheel_backend && npm run dev",
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview"

@@ -8,6 +8,7 @@ import { PrizesShowcase } from './components/PrizesShowcase';
 import { AdminPage } from './pages/AdminPage';
 import { PRIZES } from './data/prizes';
 import { sound } from './utils/audio';
+import { api } from './services/api';
 import {
   LOCAL_STORAGE_LEADS_KEY,
   LOCAL_STORAGE_CURRENT_LEAD_KEY,
@@ -44,9 +45,9 @@ export function App() {
   const [currentLead, setCurrentLead] = useState(() => {
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_CURRENT_LEAD_KEY);
-      return saved ? JSON.parse(saved) : INITIAL_LEAD;
+      return saved ? JSON.parse(saved) : null;
     } catch {
-      return INITIAL_LEAD;
+      return null;
     }
   });
 
@@ -58,6 +59,8 @@ export function App() {
   const [isMuted, setIsMuted] = useState(false);
   const [targetPrizeIndex, setTargetPrizeIndex] = useState(() => getStoredTargetIndex());
   const [bannerNotice, setBannerNotice] = useState(null);
+  const [isSubmittingLead, setIsSubmittingLead] = useState(false);
+  const [leadSubmitError, setLeadSubmitError] = useState(null);
 
   // Sync leads to localStorage
   useEffect(() => {
@@ -91,6 +94,45 @@ export function App() {
     return () => window.removeEventListener('storage', syncTarget);
   }, []);
 
+  // Background auto-sync lead status from backend (ensures claimed voucher is in sync)
+  useEffect(() => {
+    if (currentLead?.email || currentLead?.mobile) {
+      const syncLeadStatus = async () => {
+        try {
+          const res = await api.getLeads({ search: currentLead.email || currentLead.mobile });
+          if (res?.data && res.data.length > 0) {
+            const matched = res.data.find(
+              (l) =>
+                (currentLead.email && l.email?.toLowerCase() === currentLead.email.toLowerCase()) ||
+                (currentLead.mobile && l.mobile === currentLead.mobile.replace(/\D/g, ''))
+            );
+            if (matched && matched.wonPrize && !currentLead.wonPrize) {
+              const updated = {
+                ...currentLead,
+                ...matched,
+                wonPrize: matched.wonPrize,
+                voucherCode: matched.voucherCode || matched.wonPrize?.code,
+              };
+              setCurrentLead(updated);
+              setWonPrize(matched.wonPrize);
+            }
+          }
+        } catch (e) {
+          // ignore background sync error
+        }
+      };
+      syncLeadStatus();
+    }
+  }, []);
+
+  const handleOpenReward = () => {
+    sound.playClick();
+    if (currentLead?.wonPrize) {
+      setWonPrize(currentLead.wonPrize);
+    }
+    setIsPrizeModalOpen(true);
+  };
+
   const handleToggleMute = () => {
     const nextMuted = !isMuted;
     setIsMuted(nextMuted);
@@ -98,35 +140,99 @@ export function App() {
     if (!nextMuted) sound.playClick();
   };
 
-  // Called before wheel starts spinning
+  // Called before wheel starts spinning (Strict rule: each email spins only once!)
   const handleSpinStart = () => {
     if (!currentLead) {
       setIsLeadModalOpen(true);
       return false;
     }
+
+    if (currentLead.wonPrize) {
+      setBannerNotice(
+        `ℹ️ ${currentLead.email} has already claimed a reward! Showing your lifetime voucher code.`
+      );
+      if (currentLead.wonPrize) setWonPrize(currentLead.wonPrize);
+      setIsPrizeModalOpen(true);
+      return false; // Blocks spinning again with same email
+    }
+
     return true;
   };
 
-  // Called when lead form is submitted
-  const handleLeadSubmit = (leadData) => {
-    setCurrentLead(leadData);
-    setLeads((prev) => [leadData, ...prev]);
-    setIsLeadModalOpen(false);
+  // Called when lead form is submitted - integrates with real backend
+  const handleLeadSubmit = async (leadData) => {
+    setIsSubmittingLead(true);
+    setLeadSubmitError(null);
 
-    setBannerNotice(`Ready to spin! Good luck, ${leadData.name.split(' ')[0]}! 🎯`);
-    setTimeout(() => setBannerNotice(null), 4000);
+    try {
+      const res = await api.createLead(leadData);
+
+      if (res.alreadySpun && res.data?.wonPrize) {
+        // Customer with this email already spun
+        setCurrentLead(res.data);
+        setWonPrize(res.data.wonPrize);
+        setIsLeadModalOpen(false);
+        setIsPrizeModalOpen(true);
+        setBannerNotice(`ℹ️ ${leadData.email} has already claimed a voucher! Showing your code.`);
+      } else {
+        const savedLead = res.data || leadData;
+        setCurrentLead(savedLead);
+        setLeads((prev) => [savedLead, ...prev]);
+        setIsLeadModalOpen(false);
+        setBannerNotice(`Ready to spin! Good luck, ${leadData.name.split(' ')[0]}! 🎯`);
+      }
+    } catch (err) {
+      console.error(err);
+      // Fallback
+      setCurrentLead(leadData);
+      setLeads((prev) => [leadData, ...prev]);
+      setIsLeadModalOpen(false);
+      setBannerNotice(`Ready to spin! Good luck, ${leadData.name.split(' ')[0]}! 🎯`);
+    } finally {
+      setIsSubmittingLead(false);
+      setTimeout(() => setBannerNotice(null), 5000);
+    }
   };
 
-  // Called when wheel spin finishes
-  const handleSpinEnd = (prize) => {
+  // Called when wheel spin finishes - save to backend
+  const handleSpinEnd = async (prize) => {
     setWonPrize(prize);
 
     if (currentLead) {
-      const updatedLead = { ...currentLead, wonPrize: prize };
-      setCurrentLead(updatedLead);
-      setLeads((prev) =>
-        prev.map((item, idx) => (idx === 0 ? updatedLead : item))
-      );
+      try {
+        const spinRes = await api.executeSpin({
+          leadId: currentLead._id || currentLead.id,
+          name: currentLead.name,
+          email: currentLead.email,
+          mobile: currentLead.mobile,
+          spectaclesUser: currentLead.spectaclesUser,
+          prize: prize,
+          prizeCode: prize.code,
+          prizeId: prize.id,
+          voucherCode: prize.code,
+          forceIndex: targetPrizeIndex,
+        });
+
+        const updatedLead = spinRes.lead || {
+          ...currentLead,
+          wonPrize: prize,
+          voucherCode: prize.code,
+        };
+        setCurrentLead(updatedLead);
+        setLeads((prev) => [
+          updatedLead,
+          ...prev.filter((l) => (l._id || l.id) !== (updatedLead._id || updatedLead.id)),
+        ]);
+        if (spinRes.prize) setWonPrize(spinRes.prize);
+      } catch (err) {
+        console.error('Error recording spin to server:', err);
+        const updatedLead = { ...currentLead, wonPrize: prize, voucherCode: prize.code };
+        setCurrentLead(updatedLead);
+        setLeads((prev) => [
+          updatedLead,
+          ...prev.filter((l) => (l._id || l.id) !== (updatedLead._id || updatedLead.id)),
+        ]);
+      }
     }
 
     setIsPrizeModalOpen(true);
@@ -135,9 +241,32 @@ export function App() {
   // Reset for a fresh spin or new visitor
   const handleResetForNewCustomer = () => {
     sound.playClick();
-    setCurrentLead(INITIAL_LEAD);
+    setCurrentLead(null);
     setWonPrize(null);
+    localStorage.removeItem(LOCAL_STORAGE_CURRENT_LEAD_KEY);
     setIsPrizeModalOpen(false);
+    setIsLeadModalOpen(true);
+  };
+
+  // Clear current user
+  const handleClearUser = async () => {
+    sound.playClick();
+    if (currentLead) {
+      try {
+        await api.clearLeadSpin({
+          leadId: currentLead._id || currentLead.id,
+          email: currentLead.email,
+          mobile: currentLead.mobile,
+        });
+      } catch (err) {
+        console.warn('Could not clear backend lead spin:', err.message);
+      }
+    }
+    setCurrentLead(null);
+    setWonPrize(null);
+    localStorage.removeItem(LOCAL_STORAGE_CURRENT_LEAD_KEY);
+    setBannerNotice('User cleared. Enter your details to spin the wheel!');
+    setTimeout(() => setBannerNotice(null), 3500);
   };
 
   // If path is /admin, render dedicated AdminPage
@@ -154,8 +283,8 @@ export function App() {
         onToggleMute={handleToggleMute}
         userLead={currentLead}
         onEditLead={() => setIsLeadModalOpen(true)}
-        onOpenAdmin={() => navigateTo('/admin')}
-        leadsCount={leads.length}
+        onClearLead={handleClearUser}
+        onSeeReward={handleOpenReward}
       />
 
       {/* Main Container */}
@@ -193,19 +322,85 @@ export function App() {
               <span>Claim your voucher instantly!</span>
             </div>
           ) : (
-            <div className="lead-verified-pill">
-              <CheckCircle size={16} className="verified-icon" />
-              <span>
-                Playing as <strong>{currentLead.name}</strong> (+91 {currentLead.mobile})
-                {currentLead.spectaclesUser === 'yes' ? ' • 👓 Spectacles User' : ''}
-              </span>
-              <button
-                className="change-lead-link"
-                onClick={() => setIsLeadModalOpen(true)}
-              >
-                (Change)
-              </button>
-            </div>
+            <>
+              <div className="lead-verified-pill">
+                <CheckCircle size={16} className="verified-icon" />
+                <span className="lead-verified-details">
+                  Playing as <strong>{currentLead.name}</strong> (+91 {currentLead.mobile})
+                  {currentLead.spectaclesUser === 'yes' ? ' • 👓 Spectacles User' : ''}
+                </span>
+                <div className="lead-pill-actions">
+                  {currentLead.wonPrize && (
+                    <>
+                      <button
+                        className="see-reward-link"
+                        onClick={handleOpenReward}
+                        title="View your claimed voucher code"
+                      >
+                        🎁 (See Reward)
+                      </button>
+                      <span className="pill-action-sep">•</span>
+                    </>
+                  )}
+                  <button
+                    className="change-lead-link"
+                    onClick={() => setIsLeadModalOpen(true)}
+                    title="Change details"
+                  >
+                    (Change)
+                  </button>
+                  <span className="pill-action-sep">•</span>
+                  <button
+                    className="clear-lead-link"
+                    onClick={handleClearUser}
+                    title="Clear user"
+                  >
+                    (Clear)
+                  </button>
+                </div>
+              </div>
+
+              {/* Prominent Claimed Reward Spotlight Card */}
+              {currentLead.wonPrize && (
+                <div
+                  className="claimed-reward-spotlight"
+                  onClick={handleOpenReward}
+                  role="button"
+                  tabIndex={0}
+                  title="Click to view voucher code & share on WhatsApp"
+                >
+                  <div className="spotlight-top-badge">
+                    <span className="spotlight-badge-dot" />
+                    <span>EXCLUSIVE REWARD CLAIMED • LIFETIME VALIDITY</span>
+                  </div>
+                  <div className="spotlight-body">
+                    <div className="spotlight-gift-icon">🎁</div>
+                    <div className="spotlight-info">
+                      <div className="spotlight-headline">
+                        {currentLead.wonPrize.headline || currentLead.wonPrize.name}
+                      </div>
+                      <div className="spotlight-voucher-row">
+                        <span className="spotlight-voucher-label">Promo Code:</span>
+                        <span className="spotlight-voucher-code">
+                          {currentLead.voucherCode || currentLead.wonPrize.code}
+                        </span>
+                        <span className="spotlight-validity">No Expiry</span>
+                      </div>
+                    </div>
+                    <button
+                      className="btn-see-reward-spotlight"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenReward();
+                      }}
+                    >
+                      <span>See Reward</span>
+                      <span className="spotlight-arrow">➔</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -217,6 +412,9 @@ export function App() {
             isSpinning={isSpinning}
             setIsSpinning={setIsSpinning}
             targetPrizeIndex={targetPrizeIndex}
+            hasWon={!!currentLead?.wonPrize}
+            wonPrize={currentLead?.wonPrize}
+            onSeeReward={handleOpenReward}
           />
         </div>
 
@@ -229,7 +427,8 @@ export function App() {
         isOpen={isLeadModalOpen}
         onClose={() => setIsLeadModalOpen(false)}
         onSubmit={handleLeadSubmit}
-        initialData={currentLead}
+        isSubmitting={isSubmittingLead}
+        submissionError={leadSubmitError}
       />
 
       {/* Prize Won Modal */}

@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import confetti from 'canvas-confetti';
-import { Copy, Check, Share2, Sparkles, X, Gift, Clock, ExternalLink } from 'lucide-react';
+import { Copy, Check, Share2, Sparkles, X, Gift, Clock, ExternalLink, CreditCard } from 'lucide-react';
 import { sound } from '../utils/audio';
 
 export const PrizeModal = ({ isOpen, prize, userLead, onClose, onReset }) => {
   const [copied, setCopied] = useState(false);
-  const [timeLeft, setTimeLeft] = useState({ hours: 23, minutes: 59, seconds: 59 });
 
   useEffect(() => {
     if (isOpen) {
@@ -49,18 +48,6 @@ export const PrizeModal = ({ isOpen, prize, userLead, onClose, onReset }) => {
         spread: 120,
         startVelocity: 45,
       });
-
-      // Countdown timer simulation
-      const interval = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
-          if (prev.minutes > 0) return { ...prev, minutes: 59, seconds: 59 };
-          if (prev.hours > 0) return { ...prev, hours: prev.hours - 1, minutes: 59, seconds: 59 };
-          return prev;
-        });
-      }, 1000);
-
-      return () => clearInterval(interval);
     }
   }, [isOpen]);
 
@@ -132,16 +119,11 @@ export const PrizeModal = ({ isOpen, prize, userLead, onClose, onReset }) => {
             </div>
           </div>
 
-          {/* Countdown & Expiry */}
-          <div className="voucher-expiry-strip">
-            <Clock size={15} />
+          {/* Lifetime Validity Badge - No Expiry */}
+          <div className="voucher-expiry-strip" style={{ color: '#16a34a', background: '#f0fdf4', borderColor: '#bbf7d0' }}>
+            <Sparkles size={15} style={{ color: '#16a34a' }} />
             <span>
-              Expires in:{' '}
-              <strong>
-                {String(timeLeft.hours).padStart(2, '0')}:
-                {String(timeLeft.minutes).padStart(2, '0')}:
-                {String(timeLeft.seconds).padStart(2, '0')}
-              </strong>
+              <strong>Lifetime Validity</strong> • No Expiry
             </span>
           </div>
         </div>

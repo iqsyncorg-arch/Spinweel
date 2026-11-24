@@ -1,15 +1,15 @@
 import React from 'react';
-import { Volume2, VolumeX, UserCheck, ShieldAlert } from 'lucide-react';
+import { Volume2, VolumeX, UserCheck, X, Gift } from 'lucide-react';
 
 export const Header = ({
   isMuted,
   onToggleMute,
   userLead,
   onEditLead,
-  onOpenAdmin,
-  leadsCount = 1,
+  onClearLead,
+  onSeeReward,
 }) => {
-  const displayName = userLead?.name ? userLead.name.split(' ')[0] : 'Sanjay';
+  const displayName = userLead?.name ? userLead.name.split(' ')[0] : null;
 
   return (
     <header className="app-header">
@@ -28,20 +28,66 @@ export const Header = ({
           />
         </div>
 
-        {/* Right Action Controls: Sanjay (Eligible) | Sound Toggle | Leads (1) */}
+        {/* Right Action Controls: User Chip (with Clear option) | Sound Toggle */}
         <div className="header-actions">
-          {/* User lead status chip - Static fix: Sanjay / Eligible */}
-          <button
-            className="user-profile-chip"
-            onClick={onEditLead}
-            title="Click to view/edit details"
-          >
-            <UserCheck size={16} className="user-chip-icon" />
-            <div className="user-chip-text">
-              <span className="user-chip-name">{displayName}</span>
-              <span className="user-chip-badge">Eligible</span>
+          {userLead ? (
+            <div className="user-chip-group">
+              <button
+                className="user-profile-chip"
+                onClick={userLead.wonPrize && onSeeReward ? onSeeReward : onEditLead}
+                title={userLead.wonPrize ? "Click to view your claimed reward" : "Click to view/edit details"}
+              >
+                <UserCheck size={16} className="user-chip-icon" />
+                <div className="user-chip-text">
+                  <span className="user-chip-name">{displayName}</span>
+                  <span className="user-chip-badge">
+                    {userLead.wonPrize ? 'Won 🎁' : 'Eligible'}
+                  </span>
+                </div>
+              </button>
+
+              {userLead.wonPrize && onSeeReward && (
+                <button
+                  className="chip-see-reward-btn"
+                  onClick={onSeeReward}
+                  title="View your claimed voucher code"
+                  aria-label="See reward"
+                >
+                  <Gift size={13} className="reward-icon" />
+                  <span className="chip-reward-text">See Reward</span>
+                </button>
+              )}
+
+              {onClearLead && (
+                <button
+                  className="chip-clear-btn"
+                  onClick={onClearLead}
+                  title="Clear this user"
+                  aria-label="Clear user"
+                >
+                  <X size={13} className="clear-icon" />
+                  <span className="chip-clear-text">Clear</span>
+                </button>
+              )}
             </div>
-          </button>
+          ) : (
+            <button
+              className="user-profile-chip guest-chip"
+              onClick={onEditLead}
+              title="Click to enter your details to spin"
+            >
+              <UserCheck size={16} className="user-chip-icon" />
+              <div className="user-chip-text">
+                <span className="user-chip-name">Guest</span>
+                <span
+                  className="user-chip-badge"
+                  style={{ background: 'rgba(234, 179, 8, 0.25)', color: '#FDE047' }}
+                >
+                  Tap to Enter
+                </span>
+              </div>
+            </button>
+          )}
 
           {/* Sound Toggle Button */}
           <button
@@ -51,17 +97,6 @@ export const Header = ({
             aria-label="Toggle sound"
           >
             {isMuted ? <VolumeX size={19} /> : <Volume2 size={19} />}
-          </button>
-
-          {/* Admin / Leads Counter Button */}
-          <button
-            className="admin-toggle-btn"
-            onClick={onOpenAdmin}
-            title="View captured leads dashboard"
-            aria-label="Admin settings"
-          >
-            <ShieldAlert size={18} />
-            <span className="admin-btn-label">Leads ({leadsCount})</span>
           </button>
         </div>
       </div>

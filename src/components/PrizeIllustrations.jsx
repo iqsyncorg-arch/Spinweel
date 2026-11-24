@@ -468,3 +468,39 @@ export const PrizeVisual7 = () => (
     </svg>
   </div>
 );
+
+// Card 8: VIP Membership Card Worth ₹999
+export const PrizeVisual8 = () => (
+  <div className="prize-visual-box visual-vip-card">
+    <svg viewBox="0 0 160 120" className="prize-vector-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="cardFaceGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#1E293B" />
+          <stop offset="50%" stopColor="#0F172A" />
+          <stop offset="100%" stopColor="#020617" />
+        </linearGradient>
+        <linearGradient id="cardGoldBevel" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#FEF9C3" />
+          <stop offset="30%" stopColor="#FACC15" />
+          <stop offset="70%" stopColor="#CA8A04" />
+          <stop offset="100%" stopColor="#78350F" />
+        </linearGradient>
+      </defs>
+      {/* Shadow */}
+      <ellipse cx="80" cy="100" rx="46" ry="8" fill="#000000" opacity="0.6" />
+      {/* 3D Card Base */}
+      <g transform="translate(24, 22) rotate(-3)">
+        <rect x="0" y="0" width="112" height="68" rx="8" fill="url(#cardFaceGrad)" stroke="url(#cardGoldBevel)" strokeWidth="2.5" />
+        {/* Gold Chip */}
+        <rect x="12" y="14" width="22" height="16" rx="3" fill="url(#cardGoldBevel)" />
+        {/* Brand */}
+        <text x="100" y="24" fontSize="9" fontWeight="900" fill="#FFFFFF" textAnchor="end" letterSpacing="0.05em">MY SPECZ</text>
+        {/* VIP Elite pill */}
+        <rect x="12" y="44" width="30" height="13" rx="3" fill="#EAB308" />
+        <text x="27" y="53" fontSize="8" fontWeight="900" fill="#000000" textAnchor="middle">VIP ELITE</text>
+        {/* Value */}
+        <text x="100" y="53" fontSize="9" fontWeight="800" fill="#FEF08A" textAnchor="end">WORTH ₹999</text>
+      </g>
+    </svg>
+  </div>
+);

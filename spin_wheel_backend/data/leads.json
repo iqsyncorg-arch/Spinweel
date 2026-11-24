@@ -1,0 +1,27 @@
+[
+  {
+    "id": "lead-sanjay-sn-1",
+    "name": "Sanjay S N",
+    "mobile": "7868000645",
+    "email": "snsanjay2002@gmail.com",
+    "spectaclesUser": "yes",
+    "whatsappUpdates": true,
+    "wonPrize": {
+      "id": "msc-70-off",
+      "headline": "70%",
+      "subline": "Discount on Spectacle",
+      "code": "MSC70OFF",
+      "bgType": "white",
+      "bgColor": "#FFFFFF",
+      "textColor": "#B90B1E",
+      "subtextColor": "#1E293B",
+      "pillBg": "#B90B1E",
+      "pillText": "#FFFFFF",
+      "icon": "spectacles",
+      "description": "Get a massive 70% discount on complete spectacle frames & standard prescription lenses.",
+      "terms": "Valid on frames above ₹1,999. Cannot be combined with other offers. One time use per customer.",
+      "probability": 0.15
+    },
+    "submittedAt": "2026-11-24T15:38:00.000Z"
+  }
+]

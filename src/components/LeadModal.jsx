@@ -1,17 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Phone, Mail, Glasses, Sparkles, X, CheckCircle2 } from 'lucide-react';
 import { sound } from '../utils/audio';
 
-export const LeadModal = ({ isOpen, onClose, onSubmit, initialData = null }) => {
+export const LeadModal = ({ isOpen, onClose, onSubmit, isSubmitting = false, submissionError = null }) => {
+  // Always start with completely empty fields - no autofill
   const [formData, setFormData] = useState({
-    name: initialData?.name || '',
-    mobile: initialData?.mobile || '',
-    email: initialData?.email || '',
-    spectaclesUser: initialData?.spectaclesUser || 'yes', // 'yes' | 'sunglasses_only' | 'no'
+    name: '',
+    mobile: '',
+    email: '',
+    spectaclesUser: 'yes', // 'yes' | 'sunglasses_only' | 'no'
     whatsappUpdates: true,
   });
 
   const [errors, setErrors] = useState({});
+
+  // Reset to empty fields whenever modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({
+        name: '',
+        mobile: '',
+        email: '',
+        spectaclesUser: 'yes',
+        whatsappUpdates: true,
+      });
+      setErrors({});
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -81,7 +96,13 @@ export const LeadModal = ({ isOpen, onClose, onSubmit, initialData = null }) => 
           Unlock the golden wheel to win up to <strong>70% OFF</strong>, free frames, sunglasses & instant cashback!
         </p>
 
-        <form onSubmit={handleSubmit} className="lead-form">
+        {submissionError && (
+          <div style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', padding: '10px 14px', borderRadius: '10px', fontSize: '13px', marginBottom: '16px' }}>
+            {submissionError}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="lead-form" autoComplete="off">
           {/* Full Name */}
           <div className="form-group">
             <label className="form-label">
@@ -92,8 +113,10 @@ export const LeadModal = ({ isOpen, onClose, onSubmit, initialData = null }) => 
             <div className={`input-wrapper ${errors.name ? 'has-error' : ''}`}>
               <input
                 type="text"
+                name="entry_fullname"
                 placeholder="e.g. Rahul Sharma"
                 value={formData.name}
+                autoComplete="off"
                 onChange={(e) => {
                   setFormData({ ...formData, name: e.target.value });
                   if (errors.name) setErrors({ ...errors, name: null });
@@ -115,9 +138,11 @@ export const LeadModal = ({ isOpen, onClose, onSubmit, initialData = null }) => 
               <span className="country-prefix">+91</span>
               <input
                 type="tel"
+                name="entry_mobile"
                 maxLength={10}
                 placeholder="98765 43210"
                 value={formData.mobile}
+                autoComplete="off"
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '').slice(0, 10);
                   setFormData({ ...formData, mobile: val });
@@ -139,8 +164,10 @@ export const LeadModal = ({ isOpen, onClose, onSubmit, initialData = null }) => 
             <div className={`input-wrapper ${errors.email ? 'has-error' : ''}`}>
               <input
                 type="email"
+                name="entry_email"
                 placeholder="name@example.com"
                 value={formData.email}
+                autoComplete="off"
                 onChange={(e) => {
                   setFormData({ ...formData, email: e.target.value });
                   if (errors.email) setErrors({ ...errors, email: null });
@@ -206,14 +233,20 @@ export const LeadModal = ({ isOpen, onClose, onSubmit, initialData = null }) => 
           </label>
 
           {/* Submit Button */}
-          <button type="submit" className="submit-lead-btn">
-            <span>Unlock My Lucky Spin</span>
-            <span className="btn-arrow">➔</span>
+          <button type="submit" className="submit-lead-btn" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <span>Verifying & Preparing Wheel...</span>
+            ) : (
+              <>
+                <span>Unlock My Lucky Spin</span>
+                <span className="btn-arrow">➔</span>
+              </>
+            )}
           </button>
         </form>
 
         <div className="modal-privacy-note">
-          🔒 Your details are 100% secure. Only 1 spin per registered mobile number.
+          🔒 Your details are 100% secure. Only 1 spin per registered email address.
         </div>
       </div>
     </div>

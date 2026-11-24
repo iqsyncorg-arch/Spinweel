@@ -238,6 +238,31 @@ export const SegmentIcon = ({ type, size = 64 }) => {
         </svg>
       );
 
+    case 'membership_card': // Segment 7: VIP Golden credit/membership card
+      return (
+        <svg width={size} height={size * 0.65} viewBox="0 0 95 60" fill="none">
+          <defs>
+            <linearGradient id="vipCardBg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#1E293B" />
+              <stop offset="60%" stopColor="#0F172A" />
+              <stop offset="100%" stopColor="#020617" />
+            </linearGradient>
+            <linearGradient id="vipGoldEdge" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#FEF08A" />
+              <stop offset="50%" stopColor="#EAB308" />
+              <stop offset="100%" stopColor="#CA8A04" />
+            </linearGradient>
+          </defs>
+          <rect x="6" y="8" width="83" height="46" rx="6" fill="url(#vipCardBg)" stroke="url(#vipGoldEdge)" strokeWidth="2.5" />
+          <rect x="14" y="16" width="16" height="12" rx="2.5" fill="url(#vipGoldEdge)" />
+          <line x1="36" y1="20" x2="80" y2="20" stroke="#E2E8F0" strokeWidth="2" strokeOpacity="0.4" strokeLinecap="round" />
+          <line x1="36" y1="26" x2="68" y2="26" stroke="#E2E8F0" strokeWidth="1.5" strokeOpacity="0.25" strokeLinecap="round" />
+          <rect x="14" y="36" width="22" height="11" rx="2" fill="#EAB308" />
+          <text x="25" y="44.5" fontSize="7.5" fontWeight="900" fill="#000000" textAnchor="middle">VIP</text>
+          <text x="80" y="44" fontSize="8" fontWeight="800" fill="#FEF08A" textAnchor="end">₹999</text>
+        </svg>
+      );
+
     default:
       return null;
   }
