@@ -2,7 +2,8 @@
  * Client API Service to interface with spin_wheel_backend
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+const rawApiUrl = (import.meta.env.VITE_API_URL || 'https://apispinner.myspecz.com').trim().replace(/\/+$/, '');
+const API_BASE_URL = rawApiUrl.endsWith('/api') ? rawApiUrl : `${rawApiUrl}/api`;
 
 const getAuthHeader = () => {
   try {
